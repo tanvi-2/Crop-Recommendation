@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Crop Recommendation AI</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      padding: 28px;
+      border-radius: 14px;
+      width: 440px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 9px;
+      margin: 6px 0 12px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div class="card">
+  <h2>🌾 Crop Recommendation</h2>
+
+<label>Nitrogen</label> <input id="nitrogen" type="number" step="any" placeholder="e.g. 90">
+
+<label>Phosphorus</label> <input id="phosphorus" type="number" step="any" placeholder="e.g. 40">
+
+<label>Potassium</label> <input id="potassium" type="number" step="any" placeholder="e.g. 40">
+
+<label>Temperature (°C)</label> <input id="temperature" type="number" step="any" placeholder="e.g. 25">
+
+<label>Humidity (%)</label> <input id="humidity" type="number" step="any" placeholder="e.g. 80">
+
+<label>pH</label> <input id="ph" type="number" step="any" placeholder="e.g. 6.5">
+
+  <div class="hint">Typical soil pH: 5.5 – 7.5</div>
+
+<label>Rainfall (mm)</label> <input id="rainfall" type="number" step="any" placeholder="e.g. 200">
+
+<button onclick="predictCrop()">Predict Crop</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+async function predictCrop() {
+
+  const data = {
+    nitrogen: Number(document.getElementById("nitrogen").value),
+    phosphorus: Number(document.getElementById("phosphorus").value),
+    potassium: Number(document.getElementById("potassium").value),
+    temperature: Number(document.getElementById("temperature").value),
+    humidity: Number(document.getElementById("humidity").value),
+    ph: Number(document.getElementById("ph").value),
+    rainfall: Number(document.getElementById("rainfall").value)
+  };
+
+  // basic validation
+  for (const key in data) {
+    if (isNaN(data[key])) {
+      result.innerText = "⚠️ Please fill all fields";
+      return;
+    }
+  }
+
+  result.innerText = "⏳ Predicting...";
+
+  try {
+    const response = await fetch("/api/crop/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const json = await response.json();
+
+    if (json.crop) {
+      result.innerText = "✅ Recommended Crop: " + json.crop;
+    } else if (json.message) {
+      result.innerText = "⚠️ " + json.message;
+    } else {
+      result.innerText = "❌ Prediction failed";
+    }
+
+  } catch (e) {
+    result.innerText = "❌ Server not reachable";
+  }
+}
+</script>
+
+</body>
+</html>
